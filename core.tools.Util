@@ -1,0 +1,231 @@
+package core.tools;
+
+import java.util.Random;
+
+public class Util
+{
+  /////////////////////////////////////
+  //     Math and Other Methods      //
+  /////////////////////////////////////
+  public static final double PI = 3.1415926535897932384626433832795;
+  public static final double TWO_PI = PI*2;
+  public static final double TAU = TWO_PI;
+  public static final double RAD_TO_DEG = 180/PI;
+  public static final double DEG_TO_RAD = PI/180;
+  
+  public static double sqr(double val){ return val*val; }
+  
+  // Initialization function
+  public static void init()
+  {
+    // Start game timers
+    nanoTimer = System.nanoTime();
+    
+    // Fill arrays
+    fillRandomNumberArrays();
+    fillFastTrigArrays();
+  }
+
+  ///////////////////////////
+  // Trigonometric Methods //
+  ///////////////////////////  
+  private static final int TRIG_SIZE = 360;
+  private static double[] sinList = new double[TRIG_SIZE]; 
+  private static double[] cosList = new double[TRIG_SIZE]; 
+  private static void fillFastTrigArrays(){ for(int i = 0; i < TRIG_SIZE; i++){sinList[i] = Math.sin(i*DEG_TO_RAD); cosList[i] = Math.cos(i*DEG_TO_RAD);} }
+  
+  // Fast approximate trig functions, for quick and dirty trig.
+  public static double fastSin(int degrees){return (degrees < 0 ? sinList[359+(degrees%360)] : sinList[degrees%360]);}
+  public static double fastCos(int degrees){return (degrees < 0 ? cosList[359+(degrees%360)] : cosList[degrees%360]);}
+  
+  public static double fastLengthDegreesX(double length, int degrees){ return length*fastCos(degrees);}
+  public static double fastLengthDegreesY(double length, int degrees){ return length*fastSin(degrees);}
+  public static double fastLengthDegreesX(double x, double length, int degrees){return x+(length*fastCos(degrees));}
+  public static double fastLengthDegreesY(double y, double length, int degrees){return y+(length*fastSin(degrees));}
+  
+  // Provides relative, absolute, and angle differences in radians.
+  public static double directionRadians(double x, double y){return Math.atan2(y, x);}
+  public static double directionRadians(double x1, double y1, double x2, double y2){return Math.atan2(y2-y1, x2-x1);} 
+  // Returns the difference of two angles with the sign representing the shortest rotation direction to reach it.
+  public static double angleDiffRad(double angleA, double angleB){ 
+    // get the co-terminal different between the two angles
+    double angleDiff = (angleA-angleB)%TWO_PI; 
+    if(angleDiff >  PI){ angleDiff -= TWO_PI;}
+    if(angleDiff < -PI){ angleDiff += TWO_PI;}
+    return angleDiff;
+  }
+  
+  // Provides relative, absolute, and angle differences in degrees.
+  public static double directionDegrees(double x, double y){return Math.atan2(y, x)*RAD_TO_DEG;}
+  public static double directionDegrees(double x1, double y1, double x2, double y2){return Math.atan2(y2-y1, x2-x1)*RAD_TO_DEG;} 
+  // Returns the difference of two angles with the sign representing the shortest rotation direction to reach it.
+  public static double angleDiffDeg(double angleA, double angleB){ 
+    // get the co-terminal different between the two angles
+    double angleDiff = (angleA-angleB)%360; 
+    if(angleDiff >  180){ angleDiff -= 360;}
+    if(angleDiff < -180){ angleDiff += 360;}
+    return angleDiff;
+  }
+  
+  // Provides relative and absolute 2D and 3D distance checks.
+  public static double distance2D(double x, double y){return Math.sqrt(sqr(x)+sqr(y));}
+  public static double distance2D(double x1, double y1, double x2, double y2){return Math.sqrt(sqr(x2-x1)+sqr(y2-y1));}
+  public static double distance3D(double x, double y, double z){return Math.sqrt(sqr(x)+sqr(y)+sqr(z));}
+  public static double distance3D(double x1, double y1, double z1, double x2, double y2, double z2){return Math.sqrt(sqr(x2-x1)+sqr(y2-y1)+sqr(z2-z1));}
+  // Returns the length of a vector component given its length and angle in Degrees.
+  public static double lengthDegreesX(double length, double degrees){return Math.cos(degrees*DEG_TO_RAD)*length;}
+  public static double lengthDegreesY(double length, double degrees){return Math.sin(degrees*DEG_TO_RAD)*length;}
+  public static double lengthDegreesX(double x, double length, double degrees){return x+(Math.cos(degrees*DEG_TO_RAD)*length);}
+  public static double lengthDegreesY(double y, double length, double degrees){return y+(Math.sin(degrees*DEG_TO_RAD)*length);}
+  // Returns the length of a vector component given its length and angle Radians.
+  public static double lengthRadiansX(double length, double radians){return Math.cos(radians)*length;}
+  public static double lengthRadiansY(double length, double radians){return Math.sin(radians)*length;}
+  public static double lengthRadiansX(double x, double length, double radians){return x+(Math.cos(radians)*length);}
+  public static double lengthRadiansY(double y, double length, double radians){return y+(Math.sin(radians)*length);}
+  
+  
+  ////////////////////
+  // Random methods //
+  ////////////////////
+  public static Random RandomNumberGenerator = new Random();
+  private static final int RAND_SIZE = 24576;
+  private static int randIndex = 0;
+  private static double[] randomDoubleList = new double[RAND_SIZE];
+  
+  private static void fillRandomNumberArrays(){ 
+    RandomNumberGenerator.setSeed(1337l); 
+    for(int i = 0; i < RAND_SIZE; i++){randomDoubleList[i] = RandomNumberGenerator.nextDouble();} 
+    }
+  
+  // Base random methods.
+  public static double  randomDouble(){randIndex++; if(randIndex >= RAND_SIZE){randIndex = 0;} return randomDoubleList[randIndex]; }
+  public static int     randomSign(){ return (randomDouble() < 0.5 ? -1 : +1);}
+  
+  // Probability random methods.
+  public static boolean flip(){return (randomDouble()<0.500);} // 50.0% Chance
+  public static boolean roll(){return (randomDouble()<0.1666);} // 16.6% Chance
+  public static boolean dX(double val){ return (randomDouble()<val);}
+  public static boolean d6(){ return  (randomDouble()<0.1666);} // 16.6% Chance
+  public static boolean d8(){ return  (randomDouble()<0.125);}  // 12.5% Chance
+  public static boolean d10(){ return (randomDouble()<0.100);}  // 10.0% Chance
+  public static boolean d12(){ return (randomDouble()<0.0833);} // 8.33% Chance
+  public static boolean d20(){ return (randomDouble()<0.0500);} // 5.00% Chance
+  
+  // Returns a random number between 0 and val (inclusive for int and long) (exclusive for float and double).
+  public static int    random(int val){return (int)(randomDouble()*(val+1));}
+  public static long   random(long val){return (long)(randomDouble()*(val+1));}
+  public static float  random(float val){return (float)(randomDouble()*val);}
+  public static double random(double val){return randomDouble()*val;}
+  
+  // Returns a random number between val1 and val2 (inclusive for int and long) (exclusive for float and double).
+  public static int    random(int val1, int val2){return val1+random(val2-val1);}
+  public static long   random(long val1, long val2){return val1+random(val2-val1);}
+  public static float  random(float val1, float val2){return val1+random(val2-val1);}
+  public static double random(double val1, double val2){return val1+random(val2-val1);}
+  
+  // Returns a random number between + and - val.
+  public static int    randomDeviation(int val){return random(-val,val);}
+  public static long   randomDeviation(long val){return random(-val,val);}
+  public static float  randomDeviation(float val){return random(-val,val);}
+  public static double randomDeviation(double val){return random(-val,val);}
+  
+  // Randomly returns one of two choices.
+  public static int    choose(int a, int b){ return (flip() ? a : b);}
+  public static long   choose(long a, long b){ return (flip() ? a : b);}
+  public static float  choose(float a, float b){ return (flip() ? a : b);}
+  public static double choose(double a, double b){ return (flip() ? a : b);}
+  
+  // Randomly returns one of three choices.
+  public static int    choose(int a, int b, int c){ switch(random(2)){case 0: return a; case 1: return b; default: return c;}}
+  public static long   choose(long a, long b, long c){ switch(random(2)){case 0: return a; case 1: return b; default: return c;}}
+  public static float  choose(float a, float b, float c){ switch(random(2)){case 0: return a; case 1: return b; default: return c;}}
+  public static double choose(double a, double b, double c){ switch(random(2)){case 0: return a; case 1: return b; default: return c;}}
+  
+  // Randomly returns one of four choices.
+  public static int    choose(int a, int b, int c, int d){ switch(random(3)){case 0: return a; case 1: return b; case 2: return c; default: return d;}}
+  public static long   choose(long a, long b, long c, long d){ switch(random(3)){case 0: return a; case 1: return b; case 2: return c; default: return d;}}
+  public static float  choose(float a, float b, float c, float d){ switch(random(3)){case 0: return a; case 1: return b; case 2: return c; default: return d;}}
+  public static double choose(double a, double b, double c, double d){ switch(random(3)){case 0: return a; case 1: return b; case 2: return c; default: return d;}}
+  
+  // Returns true if x and y is inside a given region (inclusive).
+  public static boolean insideRegion(int x, int y, int left, int top, int right, int bot){return (insideRange(left,x,right) && insideRange(top,y,bot));}
+  public static boolean insideRegion(long x, long y, long left, long top, long right, long bot){return (insideRange(left,x,right) && insideRange(top,y,bot));}
+  public static boolean insideRegion(float x, float y, float left, float top, float right, float bot){return (insideRange(left,x,right) && insideRange(top,y,bot));}
+  public static boolean insideRegion(double x, double y, double left, double top, double right, double bot){return (insideRange(left,x,right) && insideRange(top,y,bot));}
+  
+  // Returns true if inside limits (inclusive).
+  public static boolean insideRange(int lowLimit, int val, int highLimit){if( val >= lowLimit && val <= highLimit ){return true;}return false;}
+  public static boolean insideRange(long lowLimit, long val, long highLimit){if( val >= lowLimit && val <= highLimit ){return true;}return false;}
+  public static boolean insideRange(float lowLimit, float val, float highLimit){if( val >= lowLimit && val <= highLimit ){return true;}return false;}
+  public static boolean insideRange(double lowLimit, double val, double highLimit){if( val >= lowLimit && val <= highLimit ){return true;}return false;}
+  
+  // Returns -1 if below lowLimit, +1 if above highLimit, or 0 if inside limits (inclusive).
+  public static int     rangeCheck(int lowLimit, int val, int highLimit){if( val < lowLimit ){return -1;}else if( val > highLimit ){return 1;}return 0;}
+  public static int     rangeCheck(long lowLimit, long val, long highLimit){if( val < lowLimit ){return -1;}else if( val > highLimit ){return 1;}return 0;}
+  public static int     rangeCheck(float lowLimit, float val, float highLimit){if( val < lowLimit ){return -1;}else if( val > highLimit ){return 1;}return 0;}
+  public static int     rangeCheck(double lowLimit, double val, double highLimit){if( val < lowLimit ){return -1;}else if( val > highLimit ){return 1;}return 0;}
+  
+
+  /**Returns the given value if it lies between lowLimit and highLimit, returns lowLimit if value is smaller than lowLimit, and highLimit if value larger than highLimit.
+   * Use constrict() method if both the lowLimit and highLimit are the same magnitude from zero such as +/-limit.*/
+  public static int     constrain(int lowLimit, int value, int highLimit){return (value < lowLimit ? lowLimit : (value > highLimit ? highLimit : value));}
+  /**Returns the given value if it lies between lowLimit and highLimit, returns lowLimit if value is smaller than lowLimit, and highLimit if value larger than highLimit.
+   * Use constrict() method if both the lowLimit and highLimit are the same magnitude from zero such as +/-limit.*/
+  public static long    constrain(long lowLimit, long value, long highLimit){return (value < lowLimit ? lowLimit : (value > highLimit ? highLimit : value));}
+  /**Returns the given value if it lies between lowLimit and highLimit, returns lowLimit if value is smaller than lowLimit, and highLimit if value larger than highLimit.
+   * Use constrict() method if both the lowLimit and highLimit are the same magnitude from zero such as +/-limit.*/
+  public static float   constrain(float lowLimit, float value, float highLimit){return (value < lowLimit ? lowLimit : (value > highLimit ? highLimit : value));}
+  /**Returns the given value if it lies between lowLimit and highLimit, returns lowLimit if value is smaller than lowLimit, and highLimit if value larger than highLimit.
+   * Use constrict() method if both the lowLimit and highLimit are the same magnitude from zero such as +/-limit.*/
+  public static double  constrain(double lowLimit, double value, double highLimit){return (value < lowLimit ? lowLimit : (value > highLimit ? highLimit : value));}
+  
+
+  /**Returns the given value if it lies between -limit and +limit, returns -limit if value is smaller than -limit, and +limit if value larger than +limit.
+   * Use constrain() method if you wish to specify different low and high limits.*/
+  public static int    constrict(int value, int limit){return (value < -limit ? -limit : (value > limit ? limit : value));}
+  /**Returns the given value if it lies between -limit and +limit, returns -limit if value is smaller than -limit, and +limit if value larger than +limit.
+   * Use constrain() method if you wish to specify different low and high limits.*/
+  public static long   constrict(long value, long limit){return (value < -limit ? -limit : (value > limit ? limit : value));}
+  /**Returns the given value if it lies between -limit and +limit, returns -limit if value is smaller than -limit, and +limit if value larger than +limit.
+   * Use constrain() method if you wish to specify different low and high limits.*/
+  public static float  constrict(float value, float limit){return (value < -limit ? -limit : (value > limit ? limit : value));}
+  /**Returns the given value if it lies between -limit and +limit, returns -limit if value is smaller than -limit, and +limit if value larger than +limit.
+   * Use constrain() method if you wish to specify different low and high limits.*/
+  public static double constrict(double value, double limit){return (value < -limit ? -limit : (value > limit ? limit : value));}
+  
+  ///////////////////
+  // Other Methods //
+  ///////////////////
+  private static long nanoTimer;
+  
+  // Sleeps the thread for a given number of milliseconds.
+  public static void  sleep(int milliseconds){try{Thread.sleep(milliseconds);}catch(InterruptedException e ){e.printStackTrace();}}
+  
+  // Returns the time elapsed since game started.
+  public static long  elapsedTimeNanoseconds(){ return System.nanoTime()-nanoTimer; }
+  public static long  elapsedTimeMilliseconds(){ return elapsedTimeNanoseconds()/1000000; }
+  public static int   elapsedTimeSeconds(){ return (int)(elapsedTimeNanoseconds()/1000000000); }
+  
+  public static String formatNumber(double number,int decimalPlaces)
+  {
+    // Convert number to string.
+    String output = ""+number;
+    String wholePortion = "";
+    String fractionalPortion = "";
+    int stringLength = output.length();
+    int pos = 0;
+    
+    // Get the whole portion of the number.
+    while(output.charAt(pos) != '.' && pos < stringLength)
+    { wholePortion += output.charAt(pos); pos++; }
+    pos++;
+    
+    // Get the fractional portion of the number.
+    decimalPlaces += pos;
+    while(pos < decimalPlaces)
+    { if(pos < stringLength){ fractionalPortion += output.charAt(pos); }else{ fractionalPortion += "0";} pos++;}
+    
+    return wholePortion + "." + fractionalPortion;
+  }
+  
+}
