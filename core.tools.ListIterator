@@ -1,0 +1,63 @@
+package core.tools;
+
+/** This class is to be used with core.tools.List.
+ *  An iterator can be constructed or simply call the getIterator(); method on a List.
+ *  The benefit of this iterator is it steps over null elements for you.
+ *  This class is also a thread safe alternative to using for or while loops and list.get(index);
+ *  
+ *  Example:
+ *  
+ *  List<Integer> list = new List<Integer>();
+ *  list.add(1);
+ *  list.add(2);
+ *  list.add(null);
+ *  list.add(3);
+ *  
+ *  int sum = 0;
+ *  ListIterator<Object> iterator = list.getIterator();
+ *  while(iterator.hasNext()){ sum += iterator.next().intValue(); }
+ *  System.out.println(sum);
+ *  
+ * @author Robin M. Farrell
+ */
+public class ListIterator<T>
+{
+  // Attributes
+  private List<T> list;
+  private int currentIndex, position, size;
+  private T iteratorElement;
+  private boolean hasNext;
+  
+  
+  // Constructor
+  public ListIterator(List<T> list)
+  { 
+    
+    this.list = list; 
+    size = list.size(); 
+    
+    position = currentIndex = 0; 
+    hasNext = iterateOverNulls();
+    
+  }
+    
+  
+  // Methods
+  /**Returns true if the next Element is not null.*/
+  public boolean hasNext(){return hasNext;}
+    
+  /**Returns the next list element.*/
+  public T next(){ 
+    currentIndex = position;
+    iteratorElement = list.get(position++); 
+    hasNext = iterateOverNulls(); 
+    return iteratorElement; 
+    }
+  
+  /**Returns the iterators position in the lists array, call after next() method to get the current position.*/
+  public int getIndex(){ return currentIndex; }
+  
+  // While the element at iteratorPos is null incrementPos returning false if reached the end of list. Returns true if stopped iterating over nulls (found an element.)
+  private boolean iterateOverNulls(){ while(list.get(position) == null){if(position++ >= size){return false;}}return true;}
+    
+}
