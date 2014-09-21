@@ -1,5 +1,20 @@
 package core.tools;
 
+/** This class replaces ArrayList from Java API.
+ * It's behaviour is similar to ArrayList however has some performance increases.
+ * It also doesn't implement any of the interfaces ArrayList uses.
+ * When used with the core.tools.ListIterator class it can be used safely over multiple threads.
+ * 
+ * Example:
+ * 
+ *  List<Integer> list = new List<Integer>();
+ *  list.add(1);
+ *  list.add(2);
+ *  list.add(null);
+ *  list.add(3);
+ * 
+ * @author Robin M. Farrell
+ */
 public class List<T>
 {
   // Attributes
