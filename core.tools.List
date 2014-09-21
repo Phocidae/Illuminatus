@@ -1,0 +1,140 @@
+package core.tools;
+
+public class List<T>
+{
+  // Attributes
+  private int nullElements = 0, pseudoSize = 0;
+  private T[] list;
+  
+  // Constructors
+  /**Creates a list of the given initialSize, the list will grow by a factor of two as it expands.
+   * A lists initialSize is hidden and will return a size of 0 if no elements are added.*/
+  @SuppressWarnings("unchecked")
+  public List(int initialSize){
+    list = (T[]) new Object[initialSize]; 
+  }
+  /**Creates a list of 10 size, the list will grow by a factor of two as it expands.*/
+  public List(){ this(10); }
+  
+  // Getters and Setters
+  /**Returns the number of elements that have been added to this list, includes null elements which haven't been consolidated yet.*/
+  public int     size(){return pseudoSize;}
+  /**Returns true if the given index is on the allocated portion of the list (in bounds).*/
+  public boolean listed(int index){return (index < pseudoSize && index > -1);}
+  /**Returns true if the given index is on this list (in bounds) and is not null (null element).*/
+  public boolean exists(int index){ return (index < pseudoSize && index > -1 && list[index] != null); }
+  /**Returns true if the given element exists in the list.*/
+  public boolean exists(T element){ for(int i = 0; i < pseudoSize; i++){ if(list[i].equals(element)){ return true; }} return false; }
+  
+  /**Returns the total size of the list including those which have not yet been allocated for use. Use size() method to get the current allocated size.*/
+  public int     getMaxSize(){return list.length;}
+  /**Returns the element at position index in the list.*/
+  public T       get(int index){return list[index];}
+  /**Returns the number of nullElements stored in the allocated portion of the list.*/
+  public int     getNullElements(){return nullElements;}
+  
+  /**Returns the last element to be added to the list (greatest allocated index).*/
+  public T       getLastElement(){ return get(pseudoSize-1);}
+  /**Returns the largest index allocated thus far in the list.*/
+  public int     getLastIndex(){ return pseudoSize-1; }
+  
+  /**Swaps the position of an element at indexA with the element at indexB.*/
+  public void    swapElements(int indexA, int indexB){ T tempElement = get(indexA); set(indexA,get(indexB)); set(indexB,tempElement);}
+  /**Adds an element at the end of the list. Returns the elements position.*/
+  public int     add(T element)
+  { 
+    // double the list size when its full
+    if(pseudoSize == list.length){ resizeList(); }
+    list[pseudoSize] = element;  
+    return pseudoSize++;
+  }
+  /**Writes over the given index with the given element*/
+  public void    set(int index, T element){ list[index] = element; if(element == null){nullElements++;}}
+  /**Removes the element at the given index replacing it with null.*/
+  public void    remove(int index){ list[index] = null;  nullElements++; }
+  /**Removes all copies of the given element replacing them with null.*/
+  public void    removeAll(T element){for(int i = 0; i < pseudoSize; i++){ if(list[i].equals(element)){remove(i);}}}
+  /**Removes all elements of the given elements class replacing them with null.*/
+  public void    removeAllOfClass(T element){for(int i = 0; i < pseudoSize; i++){ if(list[i].getClass().equals(element.getClass())){remove(i);}}}
+  
+  /**Finds the first element that matches the given element and returns its index, if it is not found it returns -1.*/
+  public int     findFirst(T element){for(int i = 0; i < pseudoSize; i++){if(list[i].equals(element)){return i;}}return -1;}
+  /**Finds the last element that matches the given element and returns its index, if it is not found it returns -1.*/
+  public int     findLast(T element){for(int i = pseudoSize-1; i > 0; i--){if(list[i].equals(element)){return i;}}return -1;}
+  /**Finds the first null element that is inside the allocated list and returns its index, returns -1 if none are found.*/
+  public int     findFirstNull(){if(nullElements<1){return -1;}for(int i = 0; i < pseudoSize; i++){if(list[i]==null){return i;}}return -1;}
+  /**Finds the last null element that is inside the allocated list and returns its index, returns -1 if none are found.*/
+  public int     findLastNull(){if(nullElements<1){return -1;}for(int i = pseudoSize-1; i > 0; i--){if(list[i]==null){return i;}}return -1;}
+  
+  /**Reassigns an empty list of the currentSize to list. This discards the old list which will be garbage collected.*/
+  @SuppressWarnings("unchecked")
+  public void    clear(){ list = (T[]) new Object[list.length]; pseudoSize = nullElements = 0;}
+  
+  /**Converts a list to an array, only constructs an array of size = number of elements added since creation. 
+   * (Includes null elements and gaps, use consolidate() to compact the list before conversion).*/
+  public T[] toArray(T[] copyTo){ for(int i = 0; i < copyTo.length; i++){ copyTo[i] = list[i]; } return copyTo; }
+  
+  ///**Converts a list to an array, only constructs an array of size = number of elements added since creation.
+  //* (Includes null elements and gaps, use consolidate() to compact the list before conversion).*/
+  //@SuppressWarnings("unchecked")
+  //public T[] toArray(){ T[] copyOf = (T[])(new Object[pseudoSize]); for(int i = 0; i < copyOf.length; i++){ copyOf[i] = list[i]; } return copyOf; }
+  
+  /**Returns a reference to the internal lists array, this list could contain null elements in the middle or at the end depending on size and consolidation calls*/
+  public T[] getRawArray(){ return list; }
+  
+  ///**Returns a copy to the internal lists array, this list could contain null elements in the middle or at the end depending on size and consolidation calls*/
+  //@SuppressWarnings("unchecked")
+  //public T[] toRawArray(){ T[] copyOf = (T[])(new Object[list.length]); for(int i = 0; i < list.length; i++){ copyOf[i] = list[i]; } return copyOf;  }
+  
+  /**Reassigns a list of newSize to list, with all elements of previous list copied over.*/
+  @SuppressWarnings("unchecked")
+  private void resizeList()
+  { 
+    T[] newList = (T[]) new Object[list.length+(list.length >> 1)];// Create a new list that is size+(size/2);
+    System.arraycopy(list, 0, newList, 0, list.length);// Copy old list into new list.
+    list = newList; // Replace old with new
+  }
+  
+  /**This method cleans the list of all null references within the allocated range. 
+   * After a call to this method the new list will contain no null references and be the same size as the number of non null elements stored.*/
+  public int consolidate()
+  {
+    // If the number of null references is less than 1, exit
+    if(nullElements < 1){return 0;}
+    
+    // Create a new list
+    @SuppressWarnings("unchecked")
+    T[] newList = (T[]) new Object[list.length];
+    
+    // Copy all elements from old list to new list (ignoring null)
+    int newListIndex = 0; 
+    int listIndex = 0;
+    T element;
+    // Only loop through the last known pseudoSize of list
+    while(listIndex < pseudoSize)
+    {
+      // Get the element in the list.
+      element = list[listIndex];
+      // If this element is not null, pass it to the new list.
+      if(element != null)
+      {
+        newList[newListIndex] = element;
+        newListIndex++;
+      }
+      listIndex++;
+    }
+    
+    // Replace the list reference with the newList reference
+    list = newList;
+    // The new lists pseudoSize is the number of newListIndex's passed
+    pseudoSize = newListIndex;
+    int consolidatedElements = nullElements; 
+    nullElements = 0;
+    
+    return consolidatedElements;
+  }
+
+  /**Returns a ListIterator<T> object which can be used to do thread safe iteration over a core.tools.List<T>*/
+  public ListIterator<T> getIterator(){ return new ListIterator<T>(this); }
+  
+}
