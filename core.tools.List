@@ -1,7 +1,7 @@
 package core.tools;
 
 /** This class replaces ArrayList from Java API.
- * It's behaviour is similar to ArrayList however has some performance increases.
+ * It's behaviour is similar to ArrayList however has some performance increases as well as additional features.
  * It also doesn't implement any of the interfaces ArrayList uses.
  * When used with the core.tools.ListIterator class it can be used safely over multiple threads.
  * 
